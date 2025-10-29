@@ -1,0 +1,36 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Build started on $(date)"
+      - echo "Checking out fastplay submodule astound branch..."
+      - cd fastplay && git checkout astound && cd ..
+      - echo "Logging into Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
+      - echo "Generating image tag..."
+      - export GIT_SHA=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - export TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+      - export IMAGE_TAG="${GIT_SHA}-${TIMESTAMP}"
+      - echo "Image tag will be $IMAGE_TAG"
+
+  build:
+    commands:
+      - echo "Building Docker image..."
+      - docker build --platform linux/amd64 -f lambda/Dockerfile -t $ECR_URL:$IMAGE_TAG -t $ECR_URL:latest .
+
+  post_build:
+    commands:
+      - echo "Pushing Docker image to ECR..."
+      - docker push $ECR_URL:$IMAGE_TAG
+      - docker push $ECR_URL:latest
+      - echo "Build completed on $(date)"
+      - echo "IMAGE_TAG=$IMAGE_TAG" > build_output.env
+
+artifacts:
+  files:
+    - build_output.env
+
+cache:
+  paths:
+    - "/root/.docker/**/*"

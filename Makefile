@@ -8,10 +8,11 @@ help:
 	@echo "  make init          - Initialize Terraform"
 	@echo "  make plan          - Preview infrastructure changes"
 	@echo "  make apply         - Apply infrastructure changes"
-	@echo "  make deploy        - Full deployment (infrastructure + Docker image)"
+	@echo "  make deploy        - Full deployment (CodeBuild + infrastructure)"
 	@echo "  make test-local    - Test Lambda function locally with Docker"
 	@echo "  make logs          - Tail Lambda function logs"
 	@echo "  make invoke        - Manually invoke Lambda function"
+	@echo "  make build-logs    - View CodeBuild logs"
 	@echo "  make s3-list       - List scraped data in S3"
 	@echo "  make s3-sync       - Download all data from S3"
 	@echo "  make clean         - Stop local Docker container"
@@ -41,6 +42,14 @@ logs:
 	@FUNCTION_NAME=$$(cd terraform && terraform output -raw lambda_function_name 2>/dev/null) && \
 	if [ -n "$$FUNCTION_NAME" ]; then \
 		aws logs tail /aws/lambda/$$FUNCTION_NAME --follow; \
+	else \
+		echo "Error: Run 'make apply' first to create resources"; \
+	fi
+
+build-logs:
+	@CODEBUILD_PROJECT=$$(cd terraform && terraform output -raw codebuild_project_name 2>/dev/null) && \
+	if [ -n "$$CODEBUILD_PROJECT" ]; then \
+		aws logs tail /aws/codebuild/$$CODEBUILD_PROJECT --follow; \
 	else \
 		echo "Error: Run 'make apply' first to create resources"; \
 	fi

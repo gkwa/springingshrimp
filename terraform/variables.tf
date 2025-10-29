@@ -63,3 +63,9 @@ variable "image_tag" {
   type        = string
   default     = "latest"
 }
+
+variable "git_branch" {
+  description = "Git branch to build from"
+  type        = string
+  default     = "master"
+}

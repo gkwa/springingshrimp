@@ -53,3 +53,13 @@ output "current_image_tag" {
   description = "Current deployed image tag"
   value       = var.image_tag
 }
+
+output "codebuild_project_name" {
+  description = "Name of the CodeBuild project"
+  value       = aws_codebuild_project.lambda_builder.name
+}
+
+output "codebuild_project_arn" {
+  description = "ARN of the CodeBuild project"
+  value       = aws_codebuild_project.lambda_builder.arn
+}
