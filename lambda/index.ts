@@ -133,4 +133,3 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
     }
   }
 }
-

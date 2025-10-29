@@ -21,6 +21,7 @@ Complete Terraform infrastructure for deploying the Astound Broadband data usage
 - Docker installed and running
 
 ### 1. Configure
+
 ```bash
 cd terraform
 cp terraform.tfvars.example terraform.tfvars
@@ -28,12 +29,14 @@ cp terraform.tfvars.example terraform.tfvars
 ```
 
 ### 2. Deploy
+
 ```bash
 chmod +x deploy.sh
 ./deploy.sh
 ```
 
 ### 3. Monitor
+
 ```bash
 make logs          # View Lambda logs
 make s3-list       # List scraped data
@@ -63,6 +66,7 @@ make s3-sync       # Download data
 ## 🎮 Usage
 
 ### Make Commands (Recommended)
+
 ```bash
 make help          # Show all commands
 make deploy        # Full deployment
@@ -73,6 +77,7 @@ make destroy       # Remove all
 ```
 
 ### Deployment Scripts
+
 ```bash
 cd terraform
 ./deploy.sh        # Automated deployment
@@ -82,6 +87,7 @@ cd terraform
 ## 🔧 Configuration
 
 Edit `terraform/terraform.tfvars`:
+
 ```hcl
 # Schedule options
 schedule_expression = "cron(0 */6 * * ? *)"  # Every 6 hours
@@ -97,12 +103,14 @@ alert_email = "you@example.com"
 ```
 
 ## 🧪 Local Testing
+
 ```bash
 cd terraform
 ./test-local.sh
 ```
 
 ## 📊 Monitoring
+
 ```bash
 # Real-time logs
 make logs
@@ -115,6 +123,7 @@ make s3-sync
 ```
 
 ## 🗑️ Cleanup
+
 ```bash
 make s3-sync       # Backup data first
 make destroy       # Remove all resources
@@ -128,6 +137,7 @@ make destroy       # Remove all resources
 - ✅ No secrets in logs
 
 ## 📂 Project Structure
+
 ```
 .
 ├── README.md              # This file

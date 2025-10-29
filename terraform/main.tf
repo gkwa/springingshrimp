@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -11,7 +11,7 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  
+
   default_tags {
     tags = {
       Project     = "astound-scraper"
@@ -28,7 +28,7 @@ resource "aws_s3_bucket" "data_storage" {
 
 resource "aws_s3_bucket_versioning" "data_storage" {
   bucket = aws_s3_bucket.data_storage.id
-  
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -229,4 +229,3 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
     FunctionName = aws_lambda_function.scraper.function_name
   }
 }
-

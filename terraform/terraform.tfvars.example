@@ -21,4 +21,3 @@ log_retention_days = 30
 
 # Optional: Email for alerts
 # alert_email = "your-email@example.com"
-

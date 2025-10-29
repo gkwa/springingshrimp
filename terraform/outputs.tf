@@ -42,19 +42,18 @@ output "deployment_instructions" {
   description = "Instructions for deploying the Docker image"
   value       = <<-EOT
     To deploy your Lambda function:
-    
+
     1. Build and push the Docker image:
        cd lambda
        aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${aws_ecr_repository.lambda.repository_url}
        docker build --platform linux/amd64 -t ${aws_ecr_repository.lambda.repository_url}:latest .
        docker push ${aws_ecr_repository.lambda.repository_url}:latest
-    
+
     2. Update the Lambda function:
        aws lambda update-function-code --function-name ${aws_lambda_function.scraper.function_name} --image-uri ${aws_ecr_repository.lambda.repository_url}:latest
-    
+
     3. Test the function:
        aws lambda invoke --function-name ${aws_lambda_function.scraper.function_name} /tmp/response.json
        cat /tmp/response.json
   EOT
 }
-

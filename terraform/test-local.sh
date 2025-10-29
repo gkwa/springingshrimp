@@ -6,7 +6,7 @@ echo "🧪 Local Lambda Testing Script"
 echo "=============================="
 
 # Check if Docker is running
-if ! docker info > /dev/null 2>&1; then
+if ! docker info >/dev/null 2>&1; then
     echo "❌ Error: Docker is not running"
     exit 1
 fi
@@ -30,15 +30,15 @@ echo "   Port: 9000"
 echo ""
 
 docker run -d \
-  --name astound-lambda-test \
-  -p 9000:8080 \
-  -e AWS_ACCESS_KEY_ID=test \
-  -e AWS_SECRET_ACCESS_KEY=test \
-  -e AWS_REGION=us-east-1 \
-  -e SECRET_ARN=arn:aws:secretsmanager:us-east-1:123456789012:secret:test \
-  -e S3_BUCKET=test-bucket \
-  -e ASTOUND_CONFIG=test \
-  astound-lambda-test
+    --name astound-lambda-test \
+    -p 9000:8080 \
+    -e AWS_ACCESS_KEY_ID=test \
+    -e AWS_SECRET_ACCESS_KEY=test \
+    -e AWS_REGION=us-east-1 \
+    -e SECRET_ARN=arn:aws:secretsmanager:us-east-1:123456789012:secret:test \
+    -e S3_BUCKET=test-bucket \
+    -e ASTOUND_CONFIG=test \
+    astound-lambda-test
 
 # Wait for container to be ready
 echo "   Waiting for container to be ready..."
@@ -50,7 +50,7 @@ echo "3️⃣  Testing Lambda function..."
 echo ""
 
 response=$(curl -s -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
-  -d '{"dryRun": false}')
+    -d '{"dryRun": false}')
 
 echo "Response:"
 echo "$response" | jq
@@ -71,4 +71,3 @@ echo ""
 echo "To stop and remove the container:"
 echo "   docker stop astound-lambda-test && docker rm astound-lambda-test"
 echo ""
-

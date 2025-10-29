@@ -63,4 +63,3 @@ justfile
 *.log
 coverage/
 .nyc_output/
-

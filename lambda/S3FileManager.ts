@@ -80,4 +80,3 @@ export class S3FileManager {
     console.log(`Usage record saved to s3://${this.bucket}/${key}`)
   }
 }
-
