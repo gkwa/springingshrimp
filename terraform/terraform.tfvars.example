@@ -9,8 +9,9 @@ project_name = "astound-scraper"
 astound_username = "your-username-here"
 astound_password = "your-password-here"
 
-# Schedule: Daily at 9 AM UTC (adjust timezone as needed)
-schedule_expression = "cron(0 9 * * ? *)"
+# Schedule: Daily at 9 AM PDT (4 PM UTC)
+# Note: PDT is UTC-7, so 9 AM PDT = 4 PM UTC
+schedule_expression = "cron(0 16 * * ? *)"
 schedule_enabled = true
 
 # Data retention

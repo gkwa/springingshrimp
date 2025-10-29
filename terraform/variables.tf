@@ -31,7 +31,7 @@ variable "astound_password" {
 variable "schedule_expression" {
   description = "EventBridge schedule expression (e.g., 'rate(1 hour)' or 'cron(0 12 * * ? *)')"
   type        = string
-  default     = "cron(0 9 * * ? *)" # Daily at 9 AM UTC
+  default     = "cron(0 16 * * ? *)" # Daily at 9 AM PDT (4 PM UTC)
 }
 
 variable "schedule_enabled" {
@@ -57,3 +57,10 @@ variable "alert_email" {
   type        = string
   default     = ""
 }
+
+variable "image_tag" {
+  description = "Docker image tag to deploy"
+  type        = string
+  default     = "latest"
+}
+

@@ -4,7 +4,7 @@ AWS Lambda deployment infrastructure for the [fastplay](https://github.com/gkwa/
 
 ## Overview
 
-This repository contains the AWS infrastructure code to deploy the fastplay scraper as a serverless Lambda function that runs daily at 9 AM UTC.
+This repository contains the AWS infrastructure code to deploy the fastplay scraper as a serverless Lambda function that runs daily at 9 AM PDT (4 PM UTC).
 
 ## Prerequisites
 
@@ -49,15 +49,15 @@ make s3-sync       # Download data
 ## What Gets Deployed
 
 - **Lambda Function**: Containerized Playwright scraper (2GB, 5min timeout)
-- **ECR Repository**: Docker image storage
+- **ECR Repository**: Docker image storage with immutable tags
 - **S3 Bucket**: Organized data storage with lifecycle policies
-- **Secrets Manager**: Secure credential storage
-- **EventBridge**: Daily 9 AM UTC schedule
+- **SSM Parameter Store**: Secure credential storage (FREE!)
+- **EventBridge**: Daily 9 AM PDT schedule
 - **CloudWatch**: Logs, metrics, and alarms
 - **SNS**: Email notifications (optional)
 - **IAM Roles**: Minimal required permissions
 
-**Cost**: ~$7-12/month
+**Monthly Cost**: ~$0.11 (just ECR + CloudWatch logs!)
 
 ## Commands
 ```bash
@@ -74,21 +74,27 @@ make destroy        # Remove all resources
 
 ## Schedule Configuration
 
-Default: **Daily at 9 AM UTC**
+Default: **Daily at 9 AM PDT (4 PM UTC)**
 
-To change timezone, edit `terraform/terraform.tfvars`:
+To change schedule, edit `terraform/terraform.tfvars`:
 ```hcl
-# 9 AM PST = 5 PM UTC
+# 9 AM PST (standard time) = 5 PM UTC
 schedule_expression = "cron(0 17 * * ? *)"
 
-# 9 AM EST = 2 PM UTC
-schedule_expression = "cron(0 14 * * ? *)"
+# 6 AM PDT = 1 PM UTC
+schedule_expression = "cron(0 13 * * ? *)"
 
 # Every 6 hours
 schedule_expression = "cron(0 */6 * * ? *)"
+
+# Twice daily: 9 AM and 9 PM PDT
+# 9 AM PDT = 4 PM UTC, 9 PM PDT = 4 AM UTC (next day)
+schedule_expression = "cron(0 4,16 * * ? *)"
 ```
 
 Then apply: `cd terraform && terraform apply`
+
+**Note**: PDT (Pacific Daylight Time) is UTC-7. When daylight saving ends, you'll need to adjust for PST (UTC-8).
 
 ## Project Structure
 ```
@@ -191,10 +197,33 @@ make destroy       # Remove all AWS resources
 
 ## Security
 
-- ✅ Credentials encrypted in AWS Secrets Manager
+- ✅ Credentials encrypted in SSM Parameter Store
 - ✅ S3 bucket private by default
 - ✅ IAM role with minimal permissions
 - ✅ No secrets in logs
+- ✅ Immutable Docker image tags for auditability
+
+## AWS Console Links
+
+### Core Services
+- **Lambda Function**: [astound-scraper-scraper-prod](https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions/astound-scraper-scraper-prod)
+- **S3 Bucket**: [astound-scraper-data-prod](https://s3.console.aws.amazon.com/s3/buckets/astound-scraper-data-prod?region=us-east-1)
+- **ECR Repository**: [astound-scraper-lambda](https://console.aws.amazon.com/ecr/repositories/private/376351446210/astound-scraper-lambda?region=us-east-1)
+
+### Configuration & Secrets
+- **SSM Parameter Store**: [View Parameters](https://console.aws.amazon.com/systems-manager/parameters?region=us-east-1&search=/astound-scraper)
+
+### Monitoring & Logging
+- **CloudWatch Logs**: [Lambda Log Group](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fastound-scraper-scraper-prod)
+- **CloudWatch Alarms**: [Lambda Errors Alarm](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#alarmsV2:alarm/astound-scraper-lambda-errors-prod)
+
+### Scheduling & Notifications
+- **EventBridge Rule**: [astound-scraper-schedule-prod](https://console.aws.amazon.com/events/home?region=us-east-1#/eventbus/default/rules/astound-scraper-schedule-prod)
+- **SNS Topic**: [astound-scraper-alerts-prod](https://console.aws.amazon.com/sns/v3/home?region=us-east-1#/topic/arn:aws:sns:us-east-1:376351446210:astound-scraper-alerts-prod)
+
+### Cost & Billing
+- **Cost Explorer**: [View Costs](https://console.aws.amazon.com/cost-management/home?region=us-east-1#/cost-explorer)
+- **Billing Dashboard**: [Current Month Bill](https://console.aws.amazon.com/billing/home?region=us-east-1#/bills)
 
 ## Links
 
@@ -204,3 +233,13 @@ make destroy       # Remove all AWS resources
 ## License
 
 ISC
+```
+
+Now apply the changes:
+
+```bash
+cd terraform
+terraform apply
+```
+
+Your Lambda will now run daily at **9 AM PDT (4 PM UTC)**! 🕘

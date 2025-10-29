@@ -8,6 +8,11 @@ output "lambda_function_arn" {
   value       = aws_lambda_function.scraper.arn
 }
 
+output "lambda_image_uri" {
+  description = "Current Lambda function image URI"
+  value       = aws_lambda_function.scraper.image_uri
+}
+
 output "s3_bucket_name" {
   description = "Name of the S3 bucket"
   value       = aws_s3_bucket.data_storage.id
@@ -44,23 +49,8 @@ output "ssm_password_parameter" {
   sensitive   = true
 }
 
-output "deployment_instructions" {
-  description = "Instructions for deploying the Lambda function"
-  value       = <<-EOT
-    To deploy your Lambda function:
-
-    1. Build and push the Docker image:
-       cd lambda
-       aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${aws_ecr_repository.lambda.repository_url}
-       docker build --platform linux/amd64 -t ${aws_ecr_repository.lambda.repository_url}:latest .
-       docker push ${aws_ecr_repository.lambda.repository_url}:latest
-
-    2. Update the Lambda function:
-       aws lambda update-function-code --function-name ${aws_lambda_function.scraper.function_name} --image-uri ${aws_ecr_repository.lambda.repository_url}:latest
-
-    3. Test the function:
-       aws lambda invoke --function-name ${aws_lambda_function.scraper.function_name} /tmp/response.json
-       cat /tmp/response.json
-  EOT
+output "current_image_tag" {
+  description = "Current deployed image tag"
+  value       = var.image_tag
 }
 

@@ -90,11 +90,11 @@ resource "aws_ecr_lifecycle_policy" "lambda" {
   policy = jsonencode({
     rules = [{
       rulePriority = 1
-      description  = "Keep last 5 images"
+      description  = "Keep last 10 images"
       selection = {
         tagStatus   = "any"
         countType   = "imageCountMoreThan"
-        countNumber = 5
+        countNumber = 10
       }
       action = {
         type = "expire"
@@ -172,7 +172,7 @@ resource "aws_lambda_function" "scraper" {
   function_name = "${var.project_name}-scraper-${var.environment}"
   role          = aws_iam_role.lambda.arn
   package_type  = "Image"
-  image_uri     = "${aws_ecr_repository.lambda.repository_url}:latest"
+  image_uri     = "${aws_ecr_repository.lambda.repository_url}:${var.image_tag}"
   timeout       = 300
   memory_size   = 2048
 
