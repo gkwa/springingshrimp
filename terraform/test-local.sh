@@ -2,6 +2,8 @@
 
 set -e
 
+export PAGER=cat
+
 echo "🧪 Local Lambda Testing Script"
 echo "=============================="
 
@@ -81,4 +83,3 @@ echo ""
 echo "To stop and remove the container:"
 echo "   docker stop astound-lambda-test && docker rm astound-lambda-test"
 echo ""
-

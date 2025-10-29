@@ -41,6 +41,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "data_storage" {
     id     = "delete-old-data"
     status = "Enabled"
 
+    filter {}
+
     expiration {
       days = var.data_retention_days
     }
@@ -80,9 +82,9 @@ resource "aws_ecr_lifecycle_policy" "lambda" {
       rulePriority = 1
       description  = "Keep last 5 images"
       selection = {
-        tagStatus     = "any"
-        countType     = "imageCountMoreThan"
-        countNumber   = 5
+        tagStatus   = "any"
+        countType   = "imageCountMoreThan"
+        countNumber = 5
       }
       action = {
         type = "expire"
@@ -155,10 +157,11 @@ resource "aws_lambda_function" "scraper" {
 
   environment {
     variables = {
-      S3_BUCKET          = aws_s3_bucket.data_storage.id
-      SECRET_ARN         = aws_secretsmanager_secret.astound_credentials.arn
-      ASTOUND_CONFIG     = "prod"
-      NODE_ENV           = var.environment
+      S3_BUCKET              = aws_s3_bucket.data_storage.id
+      SECRET_ARN             = aws_secretsmanager_secret.astound_credentials.arn
+      ASTOUND_CONFIG         = "prod"
+      NODE_ENV               = var.environment
+      PLAYWRIGHT_BROWSERS_PATH = "/opt/ms-playwright"
     }
   }
 
@@ -183,7 +186,7 @@ resource "aws_cloudwatch_event_rule" "schedule" {
   name                = "${var.project_name}-schedule-${var.environment}"
   description         = "Trigger Astound scraper on schedule"
   schedule_expression = var.schedule_expression
-  is_enabled          = var.schedule_enabled
+  state               = var.schedule_enabled ? "ENABLED" : "DISABLED"
 }
 
 resource "aws_cloudwatch_event_target" "lambda" {

@@ -2,6 +2,8 @@
 
 set -e
 
+export PAGER=cat
+
 echo "🚀 Starting Astound Scraper Lambda Deployment"
 echo "============================================="
 
@@ -55,23 +57,18 @@ echo ""
 echo "1️⃣  Initializing Terraform..."
 terraform init -upgrade
 
-# Step 2: Terraform Apply
+# Step 2: Apply ONLY the ECR repository first (if it doesn't exist)
 echo ""
-echo "2️⃣  Applying Terraform configuration..."
-terraform apply -auto-approve
+echo "2️⃣  Ensuring ECR repository exists..."
+terraform apply -target=aws_ecr_repository.lambda -target=aws_ecr_lifecycle_policy.lambda -auto-approve
 
-# Step 3: Get outputs
+# Step 3: Get ECR URL
 echo ""
-echo "3️⃣  Getting Terraform outputs..."
+echo "3️⃣  Getting ECR repository URL..."
 ECR_URL=$(terraform output -raw ecr_repository_url)
-FUNCTION_NAME=$(terraform output -raw lambda_function_name)
-S3_BUCKET=$(terraform output -raw s3_bucket_name)
-
 echo "   ECR Repository: $ECR_URL"
-echo "   Lambda Function: $FUNCTION_NAME"
-echo "   S3 Bucket: $S3_BUCKET"
 
-# Step 4: Build and push Docker image
+# Step 4: Build and push Docker image BEFORE creating Lambda
 echo ""
 echo "4️⃣  Building and pushing Docker image..."
 
@@ -88,24 +85,24 @@ docker build --platform linux/amd64 -f lambda/Dockerfile -t "$ECR_URL:latest" .
 echo "   Pushing Docker image to ECR..."
 docker push "$ECR_URL:latest"
 
-# Step 5: Update Lambda function
+# Step 5: Now apply the rest of the infrastructure (Lambda, etc.)
 cd terraform
 echo ""
-echo "5️⃣  Updating Lambda function code..."
-aws lambda update-function-code \
-    --function-name "$FUNCTION_NAME" \
-    --image-uri "$ECR_URL:latest" \
-    --region "$AWS_REGION"
+echo "5️⃣  Applying full Terraform configuration..."
+terraform apply -auto-approve
 
-# Wait for update to complete
-echo "   Waiting for Lambda update to complete..."
-aws lambda wait function-updated \
-    --function-name "$FUNCTION_NAME" \
-    --region "$AWS_REGION"
-
-# Step 6: Test the function
+# Step 6: Get all outputs
 echo ""
-echo "6️⃣  Testing Lambda function..."
+echo "6️⃣  Getting Terraform outputs..."
+FUNCTION_NAME=$(terraform output -raw lambda_function_name)
+S3_BUCKET=$(terraform output -raw s3_bucket_name)
+
+echo "   Lambda Function: $FUNCTION_NAME"
+echo "   S3 Bucket: $S3_BUCKET"
+
+# Step 7: Test the function
+echo ""
+echo "7️⃣  Testing Lambda function..."
 aws lambda invoke \
     --function-name "$FUNCTION_NAME" \
     --region "$AWS_REGION" \
