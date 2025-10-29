@@ -1,0 +1,22 @@
+# Copy this file to terraform.tfvars and fill in your values
+# DO NOT commit terraform.tfvars to version control
+
+aws_region = "us-east-1"
+environment = "prod"
+project_name = "astound-scraper"
+
+# Astound Broadband credentials
+astound_username = "your-username-here"
+astound_password = "your-password-here"
+
+# Schedule: Daily at 9 AM PDT (4 PM UTC)
+# Note: PDT is UTC-7, so 9 AM PDT = 4 PM UTC
+schedule_expression = "cron(0 16 * * ? *)"
+schedule_enabled = true
+
+# Data retention
+data_retention_days = 90
+log_retention_days = 30
+
+# Optional: Email for alerts
+# alert_email = "your-email@example.com"

@@ -1,0 +1,20 @@
+{
+  "name": "astound-scraper-lambda",
+  "version": "1.0.0",
+  "description": "AWS Lambda function to scrape Astound broadband data usage",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.709.0",
+    "@aws-sdk/client-ssm": "^3.709.0",
+    "playwright": "1.53.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.7.2"
+  }
+}

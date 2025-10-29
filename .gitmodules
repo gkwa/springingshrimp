@@ -1,0 +1,4 @@
+[submodule "fastplay"]
+	path = fastplay
+	url = https://github.com/gkwa/fastplay.git
+	branch = astound
