@@ -21,25 +21,25 @@ echo "  ./node_modules/.bin/tsc --version"
 echo ""
 
 docker run --rm -it --platform linux/amd64 \
-  --entrypoint /bin/bash \
-  lambda-debug || \
-docker run --rm -it --platform linux/amd64 \
-  -w /var/task \
-  -v "$(pwd)/fastplay:/fastplay:ro" \
-  -v "$(pwd)/lambda:/lambda:ro" \
-  --entrypoint /bin/bash \
-  public.ecr.aws/lambda/nodejs:20 \
-  -c "
+    --entrypoint /bin/bash \
+    lambda-debug ||
+    docker run --rm -it --platform linux/amd64 \
+        -w /var/task \
+        -v "$(pwd)/fastplay:/fastplay:ro" \
+        -v "$(pwd)/lambda:/lambda:ro" \
+        --entrypoint /bin/bash \
+        public.ecr.aws/lambda/nodejs:20 \
+        -c "
     set -e
     echo '📦 Installing pnpm...'
     npm install -g pnpm@10.12.1 >/dev/null 2>&1
-    
+
     echo '📋 Copying package files...'
     cp /fastplay/package.json /fastplay/pnpm-lock.yaml .
-    
+
     echo '⬇️  Installing dependencies...'
     pnpm install --frozen-lockfile
-    
+
     echo ''
     echo '🔍 Debug Info:'
     echo '=============='
@@ -61,4 +61,3 @@ docker run --rm -it --platform linux/amd64 \
     echo '🐚 Starting shell for manual testing...'
     /bin/bash
   "
-

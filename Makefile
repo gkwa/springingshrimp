@@ -84,4 +84,3 @@ destroy:
 	@echo "Press Ctrl+C to cancel, or Enter to continue..."
 	@read -r confirmation
 	cd terraform && terraform destroy
-

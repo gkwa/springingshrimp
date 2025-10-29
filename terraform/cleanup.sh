@@ -70,4 +70,3 @@ echo ""
 echo "✅ Cleanup complete!"
 echo ""
 echo "Now run: ./deploy.sh"
-

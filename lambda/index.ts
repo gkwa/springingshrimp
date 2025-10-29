@@ -16,27 +16,31 @@ interface LambdaResponse {
 async function getCredentials() {
   const usernameParam = process.env.USERNAME_PARAM
   const passwordParam = process.env.PASSWORD_PARAM
-  
+
   if (!usernameParam || !passwordParam) {
     throw new Error("USERNAME_PARAM and PASSWORD_PARAM environment variables must be set")
   }
 
   const client = new SSMClient({})
-  
+
   const [usernameResult, passwordResult] = await Promise.all([
-    client.send(new GetParameterCommand({
-      Name: usernameParam,
-      WithDecryption: true
-    })),
-    client.send(new GetParameterCommand({
-      Name: passwordParam,
-      WithDecryption: true
-    }))
+    client.send(
+      new GetParameterCommand({
+        Name: usernameParam,
+        WithDecryption: true,
+      }),
+    ),
+    client.send(
+      new GetParameterCommand({
+        Name: passwordParam,
+        WithDecryption: true,
+      }),
+    ),
   ])
 
   return {
     username: usernameResult.Parameter!.Value!,
-    password: passwordResult.Parameter!.Value!
+    password: passwordResult.Parameter!.Value!,
   }
 }
 
@@ -138,4 +142,3 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
     }
   }
 }
-

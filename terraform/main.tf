@@ -254,4 +254,3 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
     FunctionName = aws_lambda_function.scraper.function_name
   }
 }
-

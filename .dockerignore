@@ -59,4 +59,3 @@ coverage/
 # CI/CD
 .gitlab-ci.yml
 .circleci/
-

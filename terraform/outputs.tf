@@ -53,4 +53,3 @@ output "current_image_tag" {
   description = "Current deployed image tag"
   value       = var.image_tag
 }
-
