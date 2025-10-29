@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Tests
+tests/
+tests-examples/
+testdata/
+*.spec.ts
+playwright-report/
+test-results/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Terraform
+terraform/
+*.tf
+*.tfvars
+
+# Data
+data/
+*.json
+*.txt
+*.html
+*.png
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/
+
+# Misc
+justfile
+*.log
+coverage/
+.nyc_output/
+
