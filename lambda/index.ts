@@ -1,5 +1,5 @@
 import { chromium } from "@playwright/test"
-import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager"
+import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm"
 import { DataScraper } from "../src/services/DataScraper"
 import { UsageRecord } from "../src/models/UsageData"
 import { S3FileManager } from "./S3FileManager"
@@ -14,23 +14,29 @@ interface LambdaResponse {
 }
 
 async function getCredentials() {
-  const secretArn = process.env.SECRET_ARN
-  if (!secretArn) {
-    throw new Error("SECRET_ARN environment variable not set")
+  const usernameParam = process.env.USERNAME_PARAM
+  const passwordParam = process.env.PASSWORD_PARAM
+  
+  if (!usernameParam || !passwordParam) {
+    throw new Error("USERNAME_PARAM and PASSWORD_PARAM environment variables must be set")
   }
 
-  const client = new SecretsManagerClient({})
-  const command = new GetSecretValueCommand({ SecretId: secretArn })
-  const response = await client.send(command)
+  const client = new SSMClient({})
+  
+  const [usernameResult, passwordResult] = await Promise.all([
+    client.send(new GetParameterCommand({
+      Name: usernameParam,
+      WithDecryption: true
+    })),
+    client.send(new GetParameterCommand({
+      Name: passwordParam,
+      WithDecryption: true
+    }))
+  ])
 
-  if (!response.SecretString) {
-    throw new Error("Secret string is empty")
-  }
-
-  const secret = JSON.parse(response.SecretString)
   return {
-    username: secret.username,
-    password: secret.password,
+    username: usernameResult.Parameter!.Value!,
+    password: passwordResult.Parameter!.Value!
   }
 }
 
@@ -48,8 +54,8 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
   let record: UsageRecord
 
   try {
-    // Get credentials from Secrets Manager
-    console.log("Fetching credentials from Secrets Manager...")
+    // Get credentials from SSM Parameter Store
+    console.log("Fetching credentials from SSM Parameter Store...")
     const credentials = await getCredentials()
 
     // Launch browser

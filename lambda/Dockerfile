@@ -41,7 +41,7 @@ RUN npm install -g pnpm@10.12.1
 RUN pnpm install --frozen-lockfile
 
 # Install additional dependencies from lambda (AWS SDK + TypeScript)
-RUN pnpm add @aws-sdk/client-s3@^3.709.0 @aws-sdk/client-secrets-manager@^3.709.0 \
+RUN pnpm add @aws-sdk/client-s3@^3.709.0 @aws-sdk/client-ssm@^3.709.0 \
     --save-dev typescript@^5.7.2 @types/aws-lambda@^8.10.145
 
 # Set Playwright browsers path to a shared location
@@ -74,4 +74,3 @@ RUN rm -f lambda/*.ts
 
 # Set the handler
 CMD [ "lambda/index.handler" ]
-

@@ -49,19 +49,29 @@ resource "aws_s3_bucket_lifecycle_configuration" "data_storage" {
   }
 }
 
-# Secrets Manager for Astound credentials
-resource "aws_secretsmanager_secret" "astound_credentials" {
-  name                    = "${var.project_name}-credentials-${var.environment}"
-  description             = "Astound Broadband login credentials"
-  recovery_window_in_days = 7
+# SSM Parameters for Astound credentials (FREE alternative to Secrets Manager)
+resource "aws_ssm_parameter" "astound_username" {
+  name        = "/${var.project_name}/${var.environment}/username"
+  description = "Astound Broadband username"
+  type        = "SecureString"
+  value       = var.astound_username
+
+  tags = {
+    Project     = var.project_name
+    Environment = var.environment
+  }
 }
 
-resource "aws_secretsmanager_secret_version" "astound_credentials" {
-  secret_id = aws_secretsmanager_secret.astound_credentials.id
-  secret_string = jsonencode({
-    username = var.astound_username
-    password = var.astound_password
-  })
+resource "aws_ssm_parameter" "astound_password" {
+  name        = "/${var.project_name}/${var.environment}/password"
+  description = "Astound Broadband password"
+  type        = "SecureString"
+  value       = var.astound_password
+
+  tags = {
+    Project     = var.project_name
+    Environment = var.environment
+  }
 }
 
 # ECR repository for Lambda container image
@@ -115,7 +125,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Custom policy for S3 and Secrets Manager access
+# Custom policy for S3 and SSM Parameter Store access
 resource "aws_iam_role_policy" "lambda_custom" {
   name = "${var.project_name}-lambda-policy"
   role = aws_iam_role.lambda.id
@@ -138,9 +148,20 @@ resource "aws_iam_role_policy" "lambda_custom" {
       {
         Effect = "Allow"
         Action = [
-          "secretsmanager:GetSecretValue"
+          "ssm:GetParameter",
+          "ssm:GetParameters"
         ]
-        Resource = aws_secretsmanager_secret.astound_credentials.arn
+        Resource = [
+          aws_ssm_parameter.astound_username.arn,
+          aws_ssm_parameter.astound_password.arn
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = "*"
       }
     ]
   })
@@ -152,21 +173,22 @@ resource "aws_lambda_function" "scraper" {
   role          = aws_iam_role.lambda.arn
   package_type  = "Image"
   image_uri     = "${aws_ecr_repository.lambda.repository_url}:latest"
-  timeout       = 300  # 5 minutes
-  memory_size   = 2048 # Playwright needs memory
+  timeout       = 300
+  memory_size   = 2048
 
   environment {
     variables = {
-      S3_BUCKET              = aws_s3_bucket.data_storage.id
-      SECRET_ARN             = aws_secretsmanager_secret.astound_credentials.arn
-      ASTOUND_CONFIG         = "prod"
-      NODE_ENV               = var.environment
+      S3_BUCKET                = aws_s3_bucket.data_storage.id
+      USERNAME_PARAM           = aws_ssm_parameter.astound_username.name
+      PASSWORD_PARAM           = aws_ssm_parameter.astound_password.name
+      ASTOUND_CONFIG           = "prod"
+      NODE_ENV                 = var.environment
       PLAYWRIGHT_BROWSERS_PATH = "/opt/ms-playwright"
     }
   }
 
   ephemeral_storage {
-    size = 2048 # MB (Chromium needs space)
+    size = 2048
   }
 
   depends_on = [
@@ -203,7 +225,7 @@ resource "aws_lambda_permission" "eventbridge" {
   source_arn    = aws_cloudwatch_event_rule.schedule.arn
 }
 
-# SNS topic for alerts (optional)
+# SNS topic for alerts
 resource "aws_sns_topic" "alerts" {
   name = "${var.project_name}-alerts-${var.environment}"
 }
@@ -232,3 +254,4 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
     FunctionName = aws_lambda_function.scraper.function_name
   }
 }
+

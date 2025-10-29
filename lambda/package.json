@@ -1,37 +1,21 @@
 {
-  "name": "fastplay",
+  "name": "astound-scraper-lambda",
   "version": "1.0.0",
+  "description": "AWS Lambda function to scrape Astound broadband data usage",
   "main": "index.js",
-  "packageManager": "pnpm@10.12.1",
   "scripts": {
-    "fmt": "prettier --ignore-path=.prettierignore --config=.prettierrc.json --write .",
-    "test": "playwright test example.spec.ts",
-    "astound": "cross-env ASTOUND_CONFIG=prod playwright test astound.spec.ts",
-    "astound:headed": "cross-env ASTOUND_CONFIG=prod playwright test astound.spec.ts --headed",
-    "astound:ui": "cross-env ASTOUND_CONFIG=prod playwright test astound.spec.ts --ui",
-    "astound:test:mock": "cross-env ASTOUND_CONFIG=test playwright test astound.mock.spec.ts",
-    "astound:test:mock:headed": "cross-env ASTOUND_CONFIG=test playwright test astound.mock.spec.ts --headed",
-    "astound:test:mock:ui": "cross-env ASTOUND_CONFIG=test playwright test astound.mock.spec.ts --ui",
-    "version:major": "pnpm version major",
-    "version:minor": "pnpm version minor",
-    "version:patch": "pnpm version patch",
-    "build:lambda": "tsc lambda/index.ts lambda/S3FileManager.ts --outDir dist --module commonjs --target es2020",
-    "docker:build": "docker build --platform linux/amd64 -t astound-scraper-lambda -f lambda/Dockerfile .",
-    "docker:run": "docker run --rm -p 9000:8080 astound-scraper-lambda"
+    "build": "tsc",
+    "test": "echo \"No tests specified\" && exit 0"
   },
-  "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.709.0",
-    "@aws-sdk/client-secrets-manager": "^3.709.0",
+    "@aws-sdk/client-ssm": "^3.709.0",
     "playwright": "1.53.0"
   },
   "devDependencies": {
-    "@playwright/test": "1.53.0",
     "@types/aws-lambda": "^8.10.145",
-    "@types/node": "22.15.32",
-    "cross-env": "7.0.3",
-    "dotenv": "16.5.0",
-    "prettier": "3.5.3",
+    "@types/node": "^20.10.0",
     "typescript": "^5.7.2"
   }
 }
+
