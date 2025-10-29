@@ -11,6 +11,14 @@ if [ ! -f "main.tf" ]; then
     exit 1
 fi
 
+# Initialize fastplay submodule if not already done
+if [ ! -f "../fastplay/package.json" ]; then
+    echo "📦 Initializing fastplay submodule..."
+    cd ..
+    git submodule update --init --recursive
+    cd terraform
+fi
+
 # Check if terraform.tfvars exists
 if [ ! -f "terraform.tfvars" ]; then
     echo "❌ Error: terraform.tfvars not found"
@@ -71,7 +79,7 @@ echo "4️⃣  Building and pushing Docker image..."
 echo "   Authenticating to ECR..."
 aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_URL"
 
-# Build the image
+# Build the image from parent directory (springingshrimp root)
 echo "   Building Docker image..."
 cd ..
 docker build --platform linux/amd64 -f lambda/Dockerfile -t "$ECR_URL:latest" .
@@ -120,3 +128,4 @@ echo "   • View logs: aws logs tail /aws/lambda/$FUNCTION_NAME --follow"
 echo "   • View S3 data: aws s3 ls s3://$S3_BUCKET/data/ --recursive"
 echo "   • Manual invoke: aws lambda invoke --function-name $FUNCTION_NAME /tmp/response.json"
 echo ""
+

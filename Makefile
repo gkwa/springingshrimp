@@ -1,20 +1,26 @@
-.PHONY: help init plan apply deploy test-local logs clean destroy
+.PHONY: help init plan apply deploy test-local logs clean destroy submodule-init
 
 help:
 	@echo "Astound Scraper - AWS Lambda Deployment"
 	@echo ""
 	@echo "Available commands:"
-	@echo "  make init        - Initialize Terraform"
-	@echo "  make plan        - Preview infrastructure changes"
-	@echo "  make apply       - Apply infrastructure changes"
-	@echo "  make deploy      - Full deployment (infrastructure + Docker image)"
-	@echo "  make test-local  - Test Lambda function locally with Docker"
-	@echo "  make logs        - Tail Lambda function logs"
-	@echo "  make invoke      - Manually invoke Lambda function"
-	@echo "  make s3-list     - List scraped data in S3"
-	@echo "  make s3-sync     - Download all data from S3"
-	@echo "  make clean       - Stop local Docker container"
-	@echo "  make destroy     - Destroy all AWS resources"
+	@echo "  make submodule-init - Initialize fastplay submodule"
+	@echo "  make init          - Initialize Terraform"
+	@echo "  make plan          - Preview infrastructure changes"
+	@echo "  make apply         - Apply infrastructure changes"
+	@echo "  make deploy        - Full deployment (infrastructure + Docker image)"
+	@echo "  make test-local    - Test Lambda function locally with Docker"
+	@echo "  make logs          - Tail Lambda function logs"
+	@echo "  make invoke        - Manually invoke Lambda function"
+	@echo "  make s3-list       - List scraped data in S3"
+	@echo "  make s3-sync       - Download all data from S3"
+	@echo "  make clean         - Stop local Docker container"
+	@echo "  make destroy       - Destroy all AWS resources"
+
+submodule-init:
+	@echo "Initializing fastplay submodule..."
+	git submodule update --init --recursive
+	@echo "✅ Submodule initialized"
 
 init:
 	cd terraform && terraform init
@@ -25,10 +31,10 @@ plan:
 apply:
 	cd terraform && terraform apply
 
-deploy:
+deploy: submodule-init
 	cd terraform && ./deploy.sh
 
-test-local:
+test-local: submodule-init
 	cd terraform && ./test-local.sh
 
 logs:
@@ -43,7 +49,7 @@ invoke:
 	@FUNCTION_NAME=$$(cd terraform && terraform output -raw lambda_function_name 2>/dev/null) && \
 	if [ -n "$$FUNCTION_NAME" ]; then \
 		aws lambda invoke --function-name $$FUNCTION_NAME /tmp/response.json && \
-		cat /tmp/response.json | jq && \
+		jq </tmp/response.json && \
 		rm /tmp/response.json; \
 	else \
 		echo "Error: Run 'make apply' first to create resources"; \
@@ -76,5 +82,6 @@ clean:
 destroy:
 	@echo "⚠️  WARNING: This will destroy ALL resources and DELETE all scraped data!"
 	@echo "Press Ctrl+C to cancel, or Enter to continue..."
-	@read confirmation
+	@read -r confirmation
 	cd terraform && terraform destroy
+

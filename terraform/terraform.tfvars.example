@@ -9,10 +9,8 @@ project_name = "astound-scraper"
 astound_username = "your-username-here"
 astound_password = "your-password-here"
 
-# Schedule: Every 6 hours
-# schedule_expression = "cron(0 */6 * * ? *)"
-# Or use rate: rate(6 hours)
-schedule_expression = "cron(0 */6 * * ? *)"
+# Schedule: Daily at 9 AM UTC (adjust timezone as needed)
+schedule_expression = "cron(0 9 * * ? *)"
 schedule_enabled = true
 
 # Data retention
@@ -21,3 +19,4 @@ log_retention_days = 30
 
 # Optional: Email for alerts
 # alert_email = "your-email@example.com"
+

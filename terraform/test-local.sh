@@ -5,16 +5,26 @@ set -e
 echo "🧪 Local Lambda Testing Script"
 echo "=============================="
 
+# Initialize fastplay submodule if not already done
+if [ ! -f "../fastplay/package.json" ]; then
+    echo "📦 Initializing fastplay submodule..."
+    cd ..
+    git submodule update --init --recursive
+    cd terraform
+fi
+
 # Check if Docker is running
 if ! docker info >/dev/null 2>&1; then
     echo "❌ Error: Docker is not running"
     exit 1
 fi
 
-# Build the Docker image
+# Build the Docker image from parent directory (springingshrimp root)
 echo ""
 echo "1️⃣  Building Docker image..."
+cd ..
 docker build --platform linux/amd64 -f lambda/Dockerfile -t astound-lambda-test .
+cd terraform
 
 # Check if container is already running
 if [ "$(docker ps -q -f name=astound-lambda-test)" ]; then
@@ -71,3 +81,4 @@ echo ""
 echo "To stop and remove the container:"
 echo "   docker stop astound-lambda-test && docker rm astound-lambda-test"
 echo ""
+

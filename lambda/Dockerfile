@@ -5,6 +5,7 @@ FROM public.ecr.aws/lambda/nodejs:20
 WORKDIR ${LAMBDA_TASK_ROOT}
 
 # Install Chromium and dependencies required by Playwright
+# hadolint ignore=DL3041
 RUN dnf install -y \
     atk \
     cups-libs \
@@ -29,8 +30,8 @@ RUN dnf install -y \
     mesa-libgbm \
     && dnf clean all
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy package files from fastplay submodule
+COPY fastplay/package.json fastplay/pnpm-lock.yaml ./
 
 # Install pnpm and dependencies
 RUN npm install -g pnpm@10.12.1 && \
@@ -40,10 +41,11 @@ RUN npm install -g pnpm@10.12.1 && \
 RUN npx playwright install chromium && \
     npx playwright install-deps chromium
 
-# Copy application code
-COPY src ./src
+# Copy application code from fastplay submodule
+COPY fastplay/src ./src
+COPY fastplay/playwright.config.ts ./
 COPY lambda ./lambda
-COPY playwright.config.ts ./
 
 # Set the handler
 CMD [ "lambda/index.handler" ]
+
